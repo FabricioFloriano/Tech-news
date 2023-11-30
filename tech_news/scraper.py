@@ -2,7 +2,7 @@
 
 import time
 from parsel import Selector
-
+from tech_news.database import create_news
 import requests
 
 
@@ -73,5 +73,21 @@ def scrape_news(html_content):
 
 # Requisito 5
 def get_tech_news(amount):
-    """Seu código deve vir aqui"""
-    raise NotImplementedError
+    BASE_URL = 'https://blog.betrybe.com'
+    current_url = BASE_URL
+    collected_urls = []
+
+    while True:
+        page_content = fetch(current_url)
+        update_links = scrape_updates(page_content)
+        collected_urls.extend(update_links)
+        current_url = scrape_next_page_link(page_content)
+
+        if len(collected_urls) >= amount or not current_url:
+            break
+
+    news_result = [scrape_news(fetch(url)) for url in collected_urls[:amount]]
+
+    create_news(news_result)
+
+    return news_result
