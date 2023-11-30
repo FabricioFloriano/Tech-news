@@ -32,7 +32,7 @@ def scrape_updates(html_content):
 def scrape_next_page_link(html_content):
     selector = Selector(text=html_content)
     try:
-        next_page_link = selector.css('.pagination .next::attr(href)').get()
+        next_page_link = selector.css(".pagination .next::attr(href)").get()
         return next_page_link
     except IndexError:
         return None
@@ -40,8 +40,35 @@ def scrape_next_page_link(html_content):
 
 # Requisito 4
 def scrape_news(html_content):
-    """Seu código deve vir aqui"""
-    raise NotImplementedError
+    selector = Selector(text=html_content)
+
+    url = selector.css("link[rel=canonical]::attr(href)").get()
+    title = selector.css("h1.entry-title::text").get().strip()
+    timestamp = selector.css("li.meta-date::text").get()
+    writer = selector.css(
+        ".title-author a::text").re_first(r'\b(\w+\s\w+)\b')
+    reading_time = int(
+        selector.css("li.meta-reading-time::text").re_first(r'\d+')
+    )
+    summary = (
+        selector.css("div.entry-content > p:first-of-type")
+        .xpath("string()")
+        .get()
+        .strip()
+    )
+    category = selector.css("a.category-style > span.label::text").get()
+
+    scraped_data = {
+        "url": url,
+        "title": title,
+        "timestamp": timestamp,
+        "writer": writer,
+        "reading_time": reading_time,
+        "summary": summary,
+        "category": category,
+    }
+
+    return scraped_data
 
 
 # Requisito 5
